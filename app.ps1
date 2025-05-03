@@ -61,9 +61,6 @@ else {
     }
 }
 
-# start idm
-Start-Process -FilePath $idmLocation
-
 
 $pathExists = $false
 # get target path from user
@@ -113,6 +110,11 @@ do {
 
 
 Write-Output "Thinking...`n"
+
+# start idm
+Start-Process -FilePath $idmLocation
+# wait for idm to open
+Start-Sleep 5
 
 # list that holds 1. name and 2. link to fuckingfast page
 $fitgirlLinkInfo = @()
