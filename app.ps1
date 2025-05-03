@@ -11,7 +11,7 @@ $targetLocation = ""
 # get link to game
 while ($true) {
     # prompt user to input link to game's page
-    $fitgirlUrl = Read-Host "Enter the URL to the game you want to download! (https://fitgirl-repacks.site/...) `n"
+    $fitgirlUrl = Read-Host "Enter the URL of the game you want to download! (https://fitgirl-repacks.site/...) `n"
     Write-Host ""
 
     # reject input, if not a link to fitgirl-repacks
@@ -97,7 +97,7 @@ do {
                 Write-Host ""
                 # if the newly created path exists
                 if ((New-Item -ItemType Directory -Path $targetLocation).Exists) {
-                    Write-Output "Path created. `n`n"
+                    Write-Output "Path created. `n"
                     $pathExists = $true
                 }
                 else {
@@ -115,7 +115,7 @@ do {
 
 ### PROCESS USER INPUTS
 
-Write-Output "Thinking..."
+Write-Output "Thinking...`n"
 
 # list that holds 1. name and 2. link to fuckingfast page
 $fitgirlLinkInfo = @()
