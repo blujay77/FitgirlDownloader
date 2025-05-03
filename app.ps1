@@ -115,6 +115,8 @@ do {
 
 ### PROCESS USER INPUTS
 
+Write-Output "Thinking..."
+
 # list that holds 1. name and 2. link to fuckingfast page
 $fitgirlLinkInfo = @()
 
