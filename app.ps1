@@ -61,6 +61,9 @@ else {
     }
 }
 
+# start idm
+Start-Process -FilePath $idmLocation
+
 
 $pathExists = $false
 # get target path from user
