@@ -1,10 +1,5 @@
 Write-Host ""
 
-$fitgirlUrl = ""
-$idmLocation = ""
-$targetLocation = ""
-
-
 ### GET USER INPUTS
 
 
@@ -66,8 +61,6 @@ else {
     }
 }
 
-#start idm
-#Start-Process -FilePath $idmLocation
 
 $pathExists = $false
 # get target path from user
@@ -114,6 +107,7 @@ do {
 
 
 ### PROCESS USER INPUTS
+
 
 Write-Output "Thinking...`n"
 
