@@ -30,6 +30,14 @@ while ($true) {
 }
 
 
+# save folder name from site title
+$title = ""
+$titleIndex = $fitgirlResponse.Content.IndexOf("<title>") + "<title>".Length
+
+do {
+    $title += $fitgirlResponse.Content[$titleIndex]
+    $titleIndex++
+} while ($fitgirlResponse.Content[$titleIndex] -ne "<")
 
 
 # check IDM default path
@@ -80,8 +88,26 @@ if ($folderSelection.ShowDialog() -eq "Cancel") {
     exit
 }
 
-$targetLocation = $folderSelection.SelectedPath
+# create new folder in selected location with title
+$i = 0
+while ($true) {
+    try {
+        # create folder without number if its the folder does not yet exist
+        if ($i -eq 0) {
+        $targetLocation = New-Item -Path ($folderSelection.SelectedPath + "\" + $title) -ItemType Directory -ErrorAction Stop
+        }
+        # append number to folder if it does
+        else {
+            $targetLocation = New-Item -Path ($folderSelection.SelectedPath + "\" + $title + " ($i)") -ItemType Directory -ErrorAction Stop
+        }
 
+        # break out of loop, once folder was successfully created
+        break
+    } catch {
+        # increase number until an available one is found
+        $i++
+    }
+}
 
 ### PROCESS USER INPUTS
 
