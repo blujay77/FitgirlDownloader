@@ -10,7 +10,8 @@ while ($true) {
     Write-Host ""
 
     # reject input, if not a link to fitgirl-repacks
-    if (!$fitgirlUrl.StartsWith("https://fitgirl-repacks.site/")) {
+    if (-not $fitgirlUrl.Contains("fitgirl-repacks.site/") -or $fitgirlUrl.Contains("paste.fitgirl-repacks.site/")) {
+    #if (!$fitgirlUrl.StartsWith("https://fitgirl-repacks.site/")) {
         Write-Output "Invalid URL! `n`n"
         continue
     }
@@ -24,17 +25,16 @@ while ($true) {
         continue
     }
 
-    Write-Output ""
+    Write-Host ""
     break
 }
 
 
+
+
 # check IDM default path
-if (Test-Path -Path "C:\Program Files (x86)\Internet Download Manager\IDMan.exe") {
-    $idmLocation = "C:\Program Files (x86)\Internet Download Manager\IDMan.exe"
-}
-# if not in default path, get path from user
-else {
+$idmLocation = "C:\Program Files (x86)\Internet Download Manager\IDMan.exe"
+if (-not (Test-Path -Path $idmLocation)) {
     while ($true) {
         $idmLocation = Read-Host "Enter the path to your IDM installation! (e.g.: C:\Program Files (x86)\Internet Download Manager) `n"
         Write-Host ""
@@ -61,49 +61,26 @@ else {
     }
 }
 
+# load dialog
+Add-Type -AssemblyName System.Windows.Forms
 
-$pathExists = $false
 # get target path from user
-do {
-    $targetLocation = Read-Host "Enter the path you want to download the files to! `n"
-    Write-Host ""
+$targetLocation = $null
+Write-Output "Choose a download folder!"
 
-    # reject if empty
-    if ($targetLocation -eq "") {
-        Write-Output "Invalid path!`n`n"
-        continue
-    }
+$folderSelection = New-Object System.Windows.Forms.FolderBrowserDialog 
+$folderSelection.SelectedPath = Get-Location
+$folderSelection.Description = "Choose a download folder"
 
-    # if path doesn't exist, ask if user wants to create it
-    if (-not (Test-Path $targetLocation)) {
-        while ($true) {
-            $createNewPath = Read-Host "This path does not exist. Would you like to create it? (y/n)"
+Write-Host ""
+Write-Host ""
 
-            # if they answer no, stop asking and prompt for new path again
-            if ($createNewPath -in ("n", "N")) {
-                Write-Host ""
-                break
-            }
+# show dialog, exit if user cancels
+if ($folderSelection.ShowDialog() -eq "Cancel") {
+    exit
+}
 
-            # if they answer yes, try to create path
-            if ($createNewPath -in ("y", "Y")) {
-                Write-Host ""
-                # if the newly created path exists
-                if ((New-Item -ItemType Directory -Path $targetLocation).Exists) {
-                    Write-Output "Path created. `n"
-                    $pathExists = $true
-                }
-                else {
-                    Write-Output "Path could not be created. `n`n"
-                }
-                break
-            }
-        }
-    }
-    else {
-        $pathExists = $true
-    }
-} while ($pathExists -eq $false)
+$targetLocation = $folderSelection.SelectedPath
 
 
 ### PROCESS USER INPUTS
@@ -114,13 +91,21 @@ Write-Output "Thinking...`n"
 # start idm
 Start-Process -FilePath $idmLocation
 # wait for idm to open
-Start-Sleep 5
+Start-Sleep 3
 
 # list that holds 1. name and 2. link to fuckingfast page
 $fitgirlLinkInfo = @()
 
 # get all the fuckingfast links from fitgirl-repacks page
 $fitgirlLinks = ($fitgirlResponse.Links | Where-Object href -like "*fuckingfast.co*").href
+
+# exit if no links were found
+if ($fitgirlLinks.length -eq 0) {
+    Write-Output "No `"fuckingfast.co`" links found!"
+    exit
+}
+
+# extract file name from each link
 foreach ($link in $fitgirlLinks) {
     $name = ""
 
@@ -138,14 +123,13 @@ foreach ($link in $fitgirlLinks) {
     }
 }
 
-# exit if no links were found
-if ($fitgirlLinkInfo.length -eq 0) {
-    Write-Output "No `"fuckingfast.co`" links found!"
-    exit
-}
 
 # iterate over fitgirlLinkInfo
 foreach ($linkInfo in $fitgirlLinkInfo) {
+    
+    # wait one second
+    Start-Sleep 1
+
     # get content of fuckingfast page
     $fuckingfastResponse = (Invoke-WebRequest -UseBasicParsing -Uri $linkInfo.Link).toString()
     $downloadLink = ""
@@ -155,11 +139,12 @@ foreach ($linkInfo in $fitgirlLinkInfo) {
         $downloadLink += $fuckingfastResponse[$i]
         $i++
     }
-    
-    # add file download to queue
+
+    # add file download queue
     Start-Process -FilePath $idmLocation -ArgumentList "/a /n /d $downloadLink /p `"$targetLocation`" /f `"$($linkInfo.Name)`""
+    # start queue if not yet started
+    Start-Process -FilePath $idmLocation -ArgumentList "/s"
+
 }
 
-#start queue
-Start-Process -FilePath $idmLocation -ArgumentList "/s"
 Write-Output "Finished. Check your IDM queue to see the download progress.`n"
