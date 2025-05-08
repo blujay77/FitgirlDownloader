@@ -40,22 +40,32 @@ do {
 } while ($fitgirlResponse.Content[$titleIndex] -ne "<")
 
 
+# load dialog
+Add-Type -AssemblyName System.Windows.Forms
+
+$folderSelection = New-Object System.Windows.Forms.FolderBrowserDialog 
+$folderSelection.SelectedPath = Get-Location
+
 # check IDM default path
-$idmLocation = "C:\Program Files (x86)\Internet Download Manager\IDMan.exe"
+#$idmLocation = "C:\Program Files (x86)\Internet Download Manager\IDMan.exe"
+$idmLocation = "a"
 if (-not (Test-Path -Path $idmLocation)) {
+
+    $folderSelection.Description = "Select the folder of your IDM installation!"
+
     while ($true) {
-        $idmLocation = Read-Host "Enter the path to your IDM installation! (e.g.: C:\Program Files (x86)\Internet Download Manager) `n"
+        Write-Output "Select the folder of your IDM installation! (e.g.: C:\Program Files (x86)\Internet Download Manager) `n"
+        Write-Host ""
         Write-Host ""
 
-        # reject if empty
-        if ($idmLocation -eq "") {
-            Write-Output "Invalid path!`n`n"
-            continue
-        }
+        $folderSelection.SelectedPath = Get-Location
 
-        # remove any spaces and backslashes from start and end
-        $idmLocation.Trim(" ", "\")
-        # add exe to directory
+        # show dialog, exit if user cancels
+        if ($folderSelection.ShowDialog() -eq "Cancel") {
+            exit
+        }
+        
+        $idmLocation = $folderSelection.SelectedPath
         $idmLocation += "\IDMan.exe"
 
         # reject if program not in given path
@@ -69,14 +79,10 @@ if (-not (Test-Path -Path $idmLocation)) {
     }
 }
 
-# load dialog
-Add-Type -AssemblyName System.Windows.Forms
-
 # get target path from user
 $targetLocation = $null
 Write-Output "Choose a download folder!"
 
-$folderSelection = New-Object System.Windows.Forms.FolderBrowserDialog 
 $folderSelection.SelectedPath = Get-Location
 $folderSelection.Description = "Choose a download folder"
 
@@ -108,6 +114,7 @@ while ($true) {
         $i++
     }
 }
+
 
 ### PROCESS USER INPUTS
 
