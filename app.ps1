@@ -43,34 +43,32 @@ do {
 # load dialog
 Add-Type -AssemblyName System.Windows.Forms
 
-$folderSelection = New-Object System.Windows.Forms.FolderBrowserDialog 
-$folderSelection.SelectedPath = Get-Location
+$fileSelection = New-Object System.Windows.Forms.OpenFileDialog
+$fileSelection.InitialDirectory = "C:"
 
 # check IDM default path
-#$idmLocation = "C:\Program Files (x86)\Internet Download Manager\IDMan.exe"
-$idmLocation = "a"
+$idmLocation = "C:\Program Files (x86)\Internet Download Manager\IDMan.exe"
 if (-not (Test-Path -Path $idmLocation)) {
 
-    $folderSelection.Description = "Select the folder of your IDM installation!"
+    $fileSelection.Title = "Select the executable of your IDM installation! (...\Internet Download Manager\IDMan.exe)"
 
     while ($true) {
-        Write-Output "Select the folder of your IDM installation! (e.g.: C:\Program Files (x86)\Internet Download Manager) `n"
+        Write-Output "Select the executable of your IDM installation! (e.g.: C:\Program Files (x86)\Internet Download Manager\IDMan.exe) `n"
         Write-Host ""
         Write-Host ""
 
-        $folderSelection.SelectedPath = Get-Location
+        $fileSelection.FileName = ""
 
         # show dialog, exit if user cancels
-        if ($folderSelection.ShowDialog() -eq "Cancel") {
+        if ($fileSelection.ShowDialog() -eq "Cancel") {
             exit
         }
         
-        $idmLocation = $folderSelection.SelectedPath
-        $idmLocation += "\IDMan.exe"
+        $idmLocation = $fileSelection.FileName
 
         # reject if program not in given path
-        if (-not (Test-Path -Path $idmLocation)) {
-            Write-Output "Invalid path!`n`n"
+        if (-not ($idmLocation.EndsWith("IDMan.exe"))) {
+            Write-Output "Invalid executable!`n`n"
             continue
         }
 
@@ -83,6 +81,7 @@ if (-not (Test-Path -Path $idmLocation)) {
 $targetLocation = $null
 Write-Output "Choose a download folder!"
 
+$folderSelection = New-Object System.Windows.Forms.FolderBrowserDialog 
 $folderSelection.SelectedPath = Get-Location
 $folderSelection.Description = "Choose a download folder"
 
